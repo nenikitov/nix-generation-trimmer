@@ -1,22 +1,14 @@
+import typing as t
+
 import argparse
 import re
-import typing as t
-from enum import Enum
 from operator import itemgetter
+from profile import Profile
 from textwrap import dedent
 
 from dateutil.relativedelta import relativedelta
 
-
-class Profile(Enum):
-    USER = "user"
-    CHANNEL = "channel"
-    HOME_MANAGER = "home-manager"
-    SYSTEM = "system"
-
-    def __str__(self) -> str:
-        return self.value
-
+from generations import Profile
 
 PATTERN_RELATIVE_DELTA = re.compile(
     r"""
@@ -115,14 +107,14 @@ def args() -> Args:
         help="Age of an oldest generation to keep.",
         type=parse_relativedetla,
     )
-    parser.add_argument(
+    arg_min = parser.add_argument(
         "--min",
-        help="Minimum amount of generations to keep.",
+        help="Minimum amount of generations to keep (not including the current one).",
         type=parse_int_range(min=1),
     )
     parser.add_argument(
         "--max",
-        help="Maximum amount of generations to keep.",
+        help="Maximum amount of generations to keep (not including the current one).",
         type=parse_int_range(min=1),
     )
     parser.add_argument(
@@ -131,4 +123,9 @@ def args() -> Args:
         action="store_true",
     )
 
-    return parser.parse_args(namespace=Args())
+    args = parser.parse_args(namespace=Args())
+
+    if args.min and args.max and args.min > args.max:
+        raise argparse.ArgumentError(argument=arg_min, message="Cannot be larger than max")
+
+    return args
