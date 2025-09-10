@@ -8,7 +8,7 @@ from textwrap import dedent
 
 from dateutil.relativedelta import relativedelta
 
-from generations import Profile
+from .generations import Profile
 
 PATTERN_RELATIVE_DELTA = re.compile(
     r"""
@@ -80,7 +80,7 @@ class Args(argparse.Namespace):
 
 def args() -> Args:
     parser = argparse.ArgumentParser(
-        description="Delete old Nix generations.",
+        description="Remove old Nix generations with better arguments.",
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument(

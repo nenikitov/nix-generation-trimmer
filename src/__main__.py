@@ -4,11 +4,11 @@ import json
 import sys
 from datetime import datetime
 
-from args import Args, args
-from generations import ProfileError
+from .args import Args, args
+from .generations import ProfileError
 
 
-def main(args: Args):
+def main_args(args: Args):
     now = datetime.now()
     to_delete: dict[str, list[int]] = {}
 
@@ -41,6 +41,8 @@ def main(args: Args):
     if args.dry_run:
         print(json.dumps(to_delete))
 
+def main():
+    main_args(args())
 
 if __name__ == "__main__":
-    main(args())
+    main()
