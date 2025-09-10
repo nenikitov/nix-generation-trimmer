@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import sys
 from datetime import datetime
 
@@ -9,6 +10,7 @@ from generations import ProfileError
 
 def main(args: Args):
     now = datetime.now()
+    to_delete: dict[str, list[int]] = {}
 
     for profile in args.profile:
         try:
@@ -25,18 +27,19 @@ def main(args: Args):
                     for i, g in enumerate(generations)
                     if g.date <= now - args.older_than
                 ),
-                -1,
+                len(generations),
             )
 
-        print(keep_index)
-
         if args.max:
-            keep_index = max(keep_index, args.max)
+            keep_index = min(keep_index, args.max)
 
         if args.min:
-            keep_index = min(keep_index, args.min)
+            keep_index = max(keep_index, args.min)
 
-        print(*generations[:keep_index], sep="\n")
+        to_delete[profile.path.as_posix()] = [g.id for g in generations[keep_index:]]
+
+    if args.dry_run:
+        print(json.dumps(to_delete))
 
 
 if __name__ == "__main__":

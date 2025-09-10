@@ -41,7 +41,7 @@ class Profile(Enum):
     def path(self) -> Path:
         match self:
             case Profile.USER:
-                return (Path.home() / ".nixprofile").absolute()
+                return (Path.home() / ".nix-profile").readlink()
             case Profile.CHANNEL:
                 return (
                     Path("/")
