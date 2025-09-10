@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 import json
+import subprocess
 import sys
 from datetime import datetime
 
+from . import color
 from .args import Args, args
 from .generations import ProfileError
 
@@ -16,7 +18,10 @@ def main_args(args: Args):
         try:
             generations = profile.generations()
         except ProfileError as e:
-            print(f"Skipping: {e}", file=sys.stderr)
+            print(
+                color.FG_RED + f"Skipping: {e}" + color.RESET,
+                file=sys.stderr,
+            )
             continue
 
         keep_index = 0
@@ -40,9 +45,29 @@ def main_args(args: Args):
 
     if args.dry_run:
         print(json.dumps(to_delete))
+    else:
+        for profile, generations in to_delete.items():
+            generations = [f"{g}" for g in generations]
+            print(
+                color.FG_BLUE
+                + f"# Cleaning up profile ({profile}) by deleting generations ({", ".join(generations)})"
+                + color.RESET
+            )
+            subprocess.run(
+                [
+                    "nix-env",
+                    "-vvvv",
+                    "--profile",
+                    profile,
+                    "--delete-generations",
+                    *generations,
+                ]
+            )
+
 
 def main():
     main_args(args())
+
 
 if __name__ == "__main__":
     main()
