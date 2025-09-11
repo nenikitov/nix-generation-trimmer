@@ -35,11 +35,11 @@ def main_args(args: Args):
                 len(generations),
             )
 
-        if args.max:
-            keep_index = min(keep_index, args.max)
+        if args.keep_at_most:
+            keep_index = min(keep_index, args.keep_at_most)
 
-        if args.min:
-            keep_index = max(keep_index, args.min)
+        if args.keep_at_least:
+            keep_index = max(keep_index, args.keep_at_least)
 
         to_delete[profile.path.as_posix()] = [g.id for g in generations[keep_index:]]
 

@@ -1,7 +1,6 @@
-import typing as t
-
 import argparse
 import re
+import typing as t
 from operator import itemgetter
 from profile import Profile
 from textwrap import dedent
@@ -73,8 +72,8 @@ def parse_int_range(
 class Args(argparse.Namespace):
     profile: list[Profile]
     older_than: None | relativedelta
-    min: None | int
-    max: None | int
+    keep_at_least: None | int
+    keep_at_most: None | int
     dry_run: bool
 
 
@@ -85,9 +84,17 @@ def args() -> Args:
     )
     parser.add_argument(
         "profile",
+        help="Scope which should be cleaned up.",
+        type=Profile,
+        choices=Profile,
+        nargs="+",
+    )
+    parser.add_argument(
+        "--older-than",
+        # help="",
         help=dedent(
             """\
-                Scope which should be cleaned up.
+                Age of an oldest generation to keep.
                 Should be composed out of 1 or more duration sections in decreasing order:
                 - A section is '# duration' where '#' is a positive non-zero number and 'duration' is one of 'year', 'month', 'day', or 'hour'
                 - Each duration specifier has a plural and a 1 letter version
@@ -98,34 +105,33 @@ def args() -> Args:
                 - '17 years 1 month 3d     2          h'
             """
         ),
-        type=Profile,
-        choices=Profile,
-        nargs="+",
-    )
-    parser.add_argument(
-        "--older-than",
-        help="Age of an oldest generation to keep.",
         type=parse_relativedetla,
     )
     arg_min = parser.add_argument(
-        "--min",
+        "--keep-at-least",
         help="Minimum amount of generations to keep (not including the current one).",
         type=parse_int_range(min=1),
     )
     parser.add_argument(
-        "--max",
+        "--keep-at-most",
         help="Maximum amount of generations to keep (not including the current one).",
         type=parse_int_range(min=1),
     )
     parser.add_argument(
         "--dry-run",
-        help="Print generations to be removed, do not delete.",
+        help="Print the profile and the generations to be removed in a JSON format, do not delete them.",
         action="store_true",
     )
 
     args = parser.parse_args(namespace=Args())
 
-    if args.min and args.max and args.min > args.max:
-        raise argparse.ArgumentError(argument=arg_min, message="Cannot be larger than max")
+    if (
+        args.keep_at_least
+        and args.keep_at_most
+        and args.keep_at_least > args.keep_at_most
+    ):
+        raise argparse.ArgumentError(
+            argument=arg_min, message="Cannot be larger than max"
+        )
 
     return args
