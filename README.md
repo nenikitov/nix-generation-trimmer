@@ -48,7 +48,11 @@ The flake provides `nix-generation-trimmer` executable. You can use `--help` to 
     - Automatic garbage collection
         - NixOS
             ```nix
-            {pkgs, ...}: {
+            {
+              config,
+              pkgs,
+              ...
+            }: {
               nix.gc = {
                 automatic = true;
                 dates = "daily";
@@ -68,6 +72,7 @@ The flake provides `nix-generation-trimmer` executable. You can use `--help` to 
                       --keep-at-least 10                                             \
                       --keep-at-most 50
                   '';
+                  path = [config.nix.package.out];
                 };
               };
             }
