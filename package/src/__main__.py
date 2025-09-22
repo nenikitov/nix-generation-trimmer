@@ -16,7 +16,7 @@ def main_args(args: Args):
 
     for profile in args.profile:
         try:
-            generations = profile.generations()
+            generations = profile.generations(args)
         except ProfileError as e:
             print(
                 color.FG_RED + f"Skipping: {e}" + color.RESET,
@@ -55,7 +55,7 @@ def main_args(args: Args):
             )
             subprocess.run(
                 [
-                    "nix-env",
+                    args.nix_env_path,
                     "-vvvv",
                     "--profile",
                     profile,

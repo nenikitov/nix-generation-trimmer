@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+import typing as t
+
 import getpass
 import os
 import subprocess
@@ -5,6 +9,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+
+if t.TYPE_CHECKING:
+    from .args import Args
 
 
 @dataclass
@@ -65,15 +72,16 @@ class Profile(Enum):
             case Profile.SYSTEM:
                 return Path("/") / "nix" / "var" / "nix" / "profiles" / "system"
 
-    def generations(self) -> list[Generation]:
+    def generations(self, args: Args) -> list[Generation]:
         try:
             generations = subprocess.check_output(
-                ["nix-env", "--list-generations", "--profile", self.path],
+                [args.nix_env_path, "--list-generations", "--profile", self.path],
                 stderr=subprocess.STDOUT,
                 encoding="utf-8",
             )
             generations = [Generation.from_string(g) for g in generations.splitlines()]
-            generations = [g for g in generations if not g.current]
+            curr_index = next(i for i, g in enumerate(generations) if g.current)
+            generations = generations[:curr_index]
             generations.sort(key=lambda g: g.id, reverse=True)
             return generations
         except subprocess.CalledProcessError as e:

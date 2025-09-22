@@ -9,7 +9,7 @@
     self,
     nixpkgs,
     ...
-  }: let
+  } @ inputs: let
     lib = nixpkgs.lib;
     forEachSystem = lib.genAttrs lib.systems.flakeExposed;
 
@@ -17,21 +17,24 @@
       python3.pkgs.buildPythonApplication {
         pname = "nix-generation-trimmer";
         version = self.shortRev or self.dirtyShortRev or "unknown";
+
+        src = ./package;
         pyproject = true;
-
-        src = ./.;
-
         build-system = with python3.pkgs; [hatchling];
-
         dependencies = with python3.pkgs; [python-dateutil];
       };
   in {
+    # Packages
     packages = forEachSystem (system: rec {
-      nix-generation-trimmer = nixpkgs.legacyPackages.${system}.callPackage nix-generation-trimmer-package {};
       default = nix-generation-trimmer;
+      nix-generation-trimmer = nixpkgs.legacyPackages.${system}.callPackage nix-generation-trimmer-package {};
     });
     overlays.default = final: _: {
       nix-generation-trimmer = final.callPackage nix-generation-trimmer-package {};
     };
+
+    # Modules
+    nixosModules.default = import ./module/nix.nix inputs;
+    homeModules.default = import ./module/home.nix inputs;
   };
 }

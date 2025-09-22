@@ -71,6 +71,7 @@ def parse_int_range(
 
 class Args(argparse.Namespace):
     profile: list[Profile]
+    nix_env_path: str
     older_than: None | relativedelta
     keep_at_least: None | int
     keep_at_most: None | int
@@ -90,8 +91,12 @@ def args() -> Args:
         nargs="+",
     )
     parser.add_argument(
+        "--nix-env-path",
+        help="Path to `nix-env` executable.",
+        default="nix-env"
+    )
+    parser.add_argument(
         "--older-than",
-        # help="",
         help=dedent(
             """\
                 Age of an oldest generation to keep.
