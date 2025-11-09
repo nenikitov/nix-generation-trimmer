@@ -19,7 +19,7 @@ in {
           ExecStart = pkgs.writeShellScript cfg.serviceName (
             builtins.concatStringsSep " " (
               # Command
-              ["exec" "${self.packages.${pkgs.system}.default}/bin/nix-generation-trimmer"]
+              ["exec" "${self.packages.${pkgs.stdenv.hostPlatform.system}.default}/bin/nix-generation-trimmer"]
               # `nix-env` path
               ++ [
                 "--nix-env-path"
